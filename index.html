@@ -2,69 +2,110 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>今天吃什么</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>我的菜谱</title>
 
 <style>
 
 body{
-font-family:Arial;
-background:#f2f2f2;
-padding:20px;
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont;
+background:#fff;
+color:#222;
 }
 
-h1{
+header{
+padding:18px;
+font-size:20px;
+font-weight:600;
+border-bottom:1px solid #eee;
 text-align:center;
 }
 
-button{
-padding:10px;
-margin:5px;
-border:none;
-background:#4CAF50;
-color:white;
-border-radius:5px;
-}
-
 .container{
-max-width:700px;
-margin:auto;
+padding:16px;
+padding-bottom:90px;
 }
 
 .card{
-background:white;
-padding:15px;
-margin:15px 0;
-border-radius:12px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+border:1px solid #eee;
+border-radius:14px;
+margin-bottom:18px;
+overflow:hidden;
 }
 
 .card img{
 width:100%;
-border-radius:10px;
-margin-bottom:10px;
+display:block;
+}
+
+.card-content{
+padding:12px;
+}
+
+.card-title{
+font-size:16px;
+font-weight:600;
+margin-bottom:6px;
+}
+
+.card-sub{
+font-size:13px;
+color:#777;
+}
+
+button{
+border:1px solid #ddd;
+background:white;
+padding:10px 14px;
+border-radius:8px;
+margin-top:10px;
 }
 
 input,select,textarea{
 width:100%;
-padding:8px;
-margin-top:5px;
+padding:10px;
+margin-top:8px;
+border:1px solid #ddd;
+border-radius:8px;
+}
+
+.navbar{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:60px;
+border-top:1px solid #eee;
+background:#fff;
+display:flex;
+justify-content:space-around;
+align-items:center;
+font-size:13px;
+}
+
+.nav-item{
+text-align:center;
+color:#555;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
+<header>我的菜谱</header>
 
-<h1>🍳 今天吃什么</h1>
+<div class="container" id="content"></div>
 
-<button onclick="showAdd()">新增菜谱</button>
-<button onclick="showList()">菜谱库</button>
-<button onclick="showFridge()">冰箱推荐</button>
+<div class="navbar">
 
-<div id="content"></div>
+<div class="nav-item" onclick="showHome()">首页</div>
+<div class="nav-item" onclick="showList()">菜谱</div>
+<div class="nav-item" onclick="showAdd()">新增</div>
+<div class="nav-item" onclick="showFridge()">冰箱</div>
 
 </div>
 
@@ -76,25 +117,85 @@ function save(){
 localStorage.setItem("recipes",JSON.stringify(recipes));
 }
 
+function randomRecipes(){
+
+let shuffled=[...recipes].sort(()=>0.5-Math.random());
+return shuffled.slice(0,2);
+
+}
+
+function showHome(){
+
+let rec=randomRecipes();
+
+let html="<h3>今日推荐</h3>";
+
+rec.forEach(r=>{
+
+html+=cardHTML(r);
+
+});
+
+html+=`<button onclick="showHome()">换一批</button>`;
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+function cardHTML(r){
+
+return `
+
+<div class="card">
+
+${r.image?`<img src="${r.image}">`:""}
+
+<div class="card-content">
+
+<div class="card-title">${r.name}</div>
+
+<div class="card-sub">
+
+${r.ingredients.join(", ")}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+function showList(){
+
+let html="";
+
+recipes.forEach(r=>{
+
+html+=cardHTML(r);
+
+});
+
+document.getElementById("content").innerHTML=html;
+
+}
+
 function showAdd(){
 
 document.getElementById("content").innerHTML=`
 
-<h2>新增菜谱</h2>
+<h3>新增菜谱</h3>
 
-<label>菜名</label>
-<input id="name">
+<input id="name" placeholder="菜名">
 
-<label>图片</label>
 <input type="file" id="image" accept="image/*">
 
-<label>食材（空格分开）</label>
-<input id="ingredients">
+<input id="ingredients" placeholder="食材 空格分开">
 
-<label>做法</label>
-<textarea id="steps"></textarea>
+<textarea id="steps" placeholder="做法"></textarea>
 
-<label>口味</label>
 <select id="taste">
 <option>清淡</option>
 <option>香辣</option>
@@ -102,18 +203,9 @@ document.getElementById("content").innerHTML=`
 <option>麻辣</option>
 </select>
 
-<label>荤素</label>
 <select id="type">
 <option>荤菜</option>
 <option>素菜</option>
-</select>
-
-<label>分类</label>
-<select id="category">
-<option>家常菜</option>
-<option>下饭菜</option>
-<option>减脂餐</option>
-<option>快手菜</option>
 </select>
 
 <button onclick="addRecipe()">保存</button>
@@ -160,9 +252,7 @@ steps:document.getElementById("steps").value,
 
 taste:document.getElementById("taste").value,
 
-type:document.getElementById("type").value,
-
-category:document.getElementById("category").value
+type:document.getElementById("type").value
 
 };
 
@@ -176,49 +266,15 @@ showList();
 
 }
 
-function showList(){
-
-let html="<h2>菜谱库</h2>";
-
-recipes.forEach(r=>{
-
-html+=`
-
-<div class="card">
-
-${r.image?`<img src="${r.image}">`:""}
-
-<h3>${r.name}</h3>
-
-<p><b>食材：</b>${r.ingredients.join(", ")}</p>
-
-<p><b>口味：</b>${r.taste}</p>
-
-<p><b>分类：</b>${r.category}</p>
-
-<p><b>${r.type}</b></p>
-
-<p><b>做法：</b>${r.steps}</p>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("content").innerHTML=html;
-
-}
-
 function showFridge(){
 
 document.getElementById("content").innerHTML=`
 
-<h2>冰箱推荐</h2>
+<h3>冰箱推荐</h3>
 
-<input id="fridge" placeholder="输入冰箱食材 空格分开">
+<input id="foods" placeholder="输入食材 空格分开">
 
-<button onclick="recommend()">推荐菜</button>
+<button onclick="recommend()">推荐</button>
 
 <div id="result"></div>
 
@@ -228,9 +284,9 @@ document.getElementById("content").innerHTML=`
 
 function recommend(){
 
-let foods=document.getElementById("fridge").value.split(" ");
+let foods=document.getElementById("foods").value.split(" ");
 
-let result="";
+let html="";
 
 recipes.forEach(r=>{
 
@@ -238,29 +294,17 @@ let match=r.ingredients.filter(i=>foods.includes(i));
 
 if(match.length>0){
 
-result+=`
-
-<div class="card">
-
-${r.image?`<img src="${r.image}">`:""}
-
-<h3>${r.name}</h3>
-
-<p>匹配食材：${match.join(", ")}</p>
-
-</div>
-
-`;
+html+=cardHTML(r);
 
 }
 
 });
 
-document.getElementById("result").innerHTML=result || "没有找到匹配菜谱";
+document.getElementById("result").innerHTML=html || "没有匹配菜谱";
 
 }
 
-showList();
+showHome();
 
 </script>
 
