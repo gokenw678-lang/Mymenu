@@ -3,21 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>我的菜谱</title>
 
 <style>
 
-/* ===== 莫兰迪配色 ===== */
-
+/* ===== 颜色（莫兰迪） ===== */
 :root{
 --main:#6c7a89;
---accent:#b0a89f;
---line:#e6e6e6;
+--accent:#b7a99a;
+--line:#e8e8e8;
 --bg:#fafafa;
 }
 
-/* ===== 全局 ===== */
+/* ===== 基础 ===== */
 
 body{
 margin:0;
@@ -65,36 +63,21 @@ margin-bottom:8px;
 /* ===== 标签 ===== */
 
 .tag{
+display:inline-block;
 border:1px solid var(--accent);
 border-radius:14px;
-padding:3px 10px;
+padding:4px 10px;
 margin:3px;
-display:inline-block;
 font-size:12px;
 color:var(--accent);
-}
-
-/* ===== 按钮 ===== */
-
-button{
-border:1px solid var(--main);
-background:white;
-padding:8px 16px;
-border-radius:20px;
-color:var(--main);
-margin-top:6px;
-}
-
-button.primary{
-background:var(--main);
-color:white;
 }
 
 /* ===== 输入框统一 ===== */
 
 input,
 textarea,
-select{
+select,
+.file-btn{
 
 width:100%;
 height:44px;
@@ -114,6 +97,31 @@ font-size:14px;
 textarea{
 height:90px;
 resize:none;
+}
+
+/* ===== 上传按钮 ===== */
+
+.file-btn{
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
+
+/* 隐藏默认 file input */
+input[type=file]{
+display:none;
+}
+
+/* ===== 按钮 ===== */
+
+button{
+border:1px solid var(--main);
+background:white;
+padding:8px 16px;
+border-radius:20px;
+color:var(--main);
+margin-top:6px;
 }
 
 /* ===== 底部导航 ===== */
@@ -142,42 +150,33 @@ border-right:none;
 </style>
 </head>
 
-
 <body>
 
 <header>我的菜谱</header>
 
-
 <!-- 首页 -->
-
 <div id="home" class="page active">
-
 <h3>今日推荐</h3>
-
 <div id="homeList"></div>
-
 </div>
 
-
-
 <!-- 全部菜谱 -->
-
 <div id="all" class="page">
 
-<h3>筛选</h3>
-
-<select id="tasteFilter" multiple>
-<option value="咸香">咸香</option>
-<option value="酸甜">酸甜</option>
-<option value="香辣">香辣</option>
-<option value="清炒">清炒</option>
+<select id="tasteFilter">
+<option value="">请选择口味</option>
+<option>咸香</option>
+<option>酸甜</option>
+<option>香辣</option>
+<option>清炒</option>
 </select>
 
-<select id="methodFilter" multiple>
-<option value="炒">炒</option>
-<option value="炖">炖</option>
-<option value="炸">炸</option>
-<option value="焖">焖</option>
+<select id="methodFilter">
+<option value="">请选择做法</option>
+<option>炒</option>
+<option>炖</option>
+<option>炸</option>
+<option>焖</option>
 </select>
 
 <button onclick="filterRecipes()">筛选</button>
@@ -186,10 +185,7 @@ border-right:none;
 
 </div>
 
-
-
 <!-- 冰箱推荐 -->
-
 <div id="fridge" class="page">
 
 <input id="fridgeInput" placeholder="输入食材，例如：鸡蛋 土豆">
@@ -200,10 +196,7 @@ border-right:none;
 
 </div>
 
-
-
 <!-- 新增菜谱 -->
-
 <div id="add" class="page">
 
 <input id="name" placeholder="菜名">
@@ -212,69 +205,71 @@ border-right:none;
 
 <textarea id="steps" placeholder="做法"></textarea>
 
+<!-- 上传图片 -->
+<label class="file-btn">
+上传图片
 <input type="file" id="image">
+</label>
 
-<select id="tasteSelect" multiple>
-<option value="咸香">咸香</option>
-<option value="酸甜">酸甜</option>
-<option value="香辣">香辣</option>
-<option value="清炒">清炒</option>
+<!-- 口味选择 -->
+<select id="tasteSelect">
+<option value="">请选择口味</option>
+<option>咸香</option>
+<option>酸甜</option>
+<option>香辣</option>
+<option>清炒</option>
 </select>
 
-<select id="methodSelect" multiple>
-<option value="炒">炒</option>
-<option value="炖">炖</option>
-<option value="炸">炸</option>
-<option value="焖">焖</option>
+<button onclick="addTaste()">添加口味</button>
+
+<div id="tasteTags"></div>
+
+<!-- 做法选择 -->
+
+<select id="methodSelect">
+<option value="">请选择做法</option>
+<option>炒</option>
+<option>炖</option>
+<option>炸</option>
+<option>焖</option>
 </select>
 
-<button class="primary" onclick="saveRecipe()">保存</button>
+<button onclick="addMethod()">添加做法</button>
+
+<div id="methodTags"></div>
+
+<button onclick="saveRecipe()">保存</button>
 
 </div>
 
-
-
-<!-- 详情页 -->
-
+<!-- 详情 -->
 <div id="detail" class="page">
-
 <div id="detailContent"></div>
-
 <button onclick="deleteRecipe()">删除</button>
-
 </div>
-
-
 
 <!-- 底部导航 -->
-
 <nav>
-
 <button onclick="show('home')">首页</button>
-
 <button onclick="show('all')">菜谱</button>
-
 <button onclick="show('fridge')">冰箱</button>
-
 <button onclick="show('add')">新增</button>
-
 </nav>
-
-
 
 <script>
 
 /* ===== 数据 ===== */
 
-let recipes=JSON.parse(localStorage.getItem("recipes")||"[]")
+let recipes = JSON.parse(localStorage.getItem("recipes") || "[]")
 
-let currentIndex=null
+let currentIndex = null
+
+let tasteList=[]
+let methodList=[]
 
 function saveData(){
 localStorage.setItem("recipes",JSON.stringify(recipes))
 }
-
-
 
 /* ===== 页面切换 ===== */
 
@@ -286,19 +281,15 @@ document.querySelectorAll(".page")
 document.getElementById(id).classList.add("active")
 
 if(id==="all") renderRecipes()
-
 if(id==="home") renderHome()
 
 }
-
-
 
 /* ===== 首页推荐 ===== */
 
 function renderHome(){
 
 let box=document.getElementById("homeList")
-
 box.innerHTML=""
 
 if(recipes.length===0){
@@ -314,14 +305,11 @@ box.innerHTML+=card(r,recipes.indexOf(r))
 
 }
 
-
-
-/* ===== 卡片 ===== */
+/* ===== 菜谱卡片 ===== */
 
 function card(r,i){
 
 return `
-
 <div class="card" onclick="openDetail(${i})">
 
 ${r.image?`<img src="${r.image}">`:""}
@@ -329,26 +317,20 @@ ${r.image?`<img src="${r.image}">`:""}
 <h3>${r.name}</h3>
 
 <div>
-
 ${r.taste.map(t=>`<span class="tag">${t}</span>`).join("")}
 ${r.method.map(m=>`<span class="tag">${m}</span>`).join("")}
-
 </div>
 
 </div>
-
 `
 
 }
-
-
 
 /* ===== 渲染菜谱 ===== */
 
 function renderRecipes(list=recipes){
 
 let box=document.getElementById("recipeList")
-
 box.innerHTML=""
 
 list.forEach((r,i)=>{
@@ -357,21 +339,17 @@ box.innerHTML+=card(r,i)
 
 }
 
-
-
 /* ===== 筛选 ===== */
 
 function filterRecipes(){
 
-let taste=[...document.getElementById("tasteFilter").selectedOptions].map(o=>o.value)
-
-let method=[...document.getElementById("methodFilter").selectedOptions].map(o=>o.value)
+let taste=document.getElementById("tasteFilter").value
+let method=document.getElementById("methodFilter").value
 
 let list=recipes.filter(r=>{
 
-let tOk=!taste.length||taste.some(t=>r.taste.includes(t))
-
-let mOk=!method.length||method.some(m=>r.method.includes(m))
+let tOk=!taste||r.taste.includes(taste)
+let mOk=!method||r.method.includes(method)
 
 return tOk && mOk
 
@@ -381,69 +359,90 @@ renderRecipes(list)
 
 }
 
+/* ===== 添加口味标签 ===== */
 
+function addTaste(){
+
+let v=document.getElementById("tasteSelect").value
+
+if(!v||tasteList.includes(v))return
+
+tasteList.push(v)
+
+renderTags()
+
+}
+
+/* ===== 添加做法标签 ===== */
+
+function addMethod(){
+
+let v=document.getElementById("methodSelect").value
+
+if(!v||methodList.includes(v))return
+
+methodList.push(v)
+
+renderTags()
+
+}
+
+/* ===== 渲染标签 ===== */
+
+function renderTags(){
+
+document.getElementById("tasteTags").innerHTML=
+tasteList.map(t=>`<span class="tag">${t}</span>`).join("")
+
+document.getElementById("methodTags").innerHTML=
+methodList.map(m=>`<span class="tag">${m}</span>`).join("")
+
+}
 
 /* ===== 保存菜谱 ===== */
 
 function saveRecipe(){
 
 let name=document.getElementById("name").value
-
 let ingredients=document.getElementById("ingredients").value.split(" ")
-
 let steps=document.getElementById("steps").value
-
-let taste=[...document.getElementById("tasteSelect").selectedOptions].map(o=>o.value)
-
-let method=[...document.getElementById("methodSelect").selectedOptions].map(o=>o.value)
 
 let file=document.getElementById("image").files[0]
 
 if(!name)return alert("请输入菜名")
+
+function finish(img){
+
+recipes.push({
+name,
+ingredients,
+steps,
+taste:[...tasteList],
+method:[...methodList],
+image:img
+})
+
+saveData()
+
+alert("保存成功")
+
+}
 
 if(file){
 
 let reader=new FileReader()
 
 reader.onload=function(){
-
-recipes.push({
-name,
-ingredients,
-steps,
-taste,
-method,
-image:reader.result
-})
-
-saveData()
-
-alert("保存成功")
-
+finish(reader.result)
 }
 
 reader.readAsDataURL(file)
 
 }else{
-
-recipes.push({
-name,
-ingredients,
-steps,
-taste,
-method,
-image:null
-})
-
-saveData()
-
-alert("保存成功")
-
+finish(null)
 }
 
 }
-
-
 
 /* ===== 冰箱推荐 ===== */
 
@@ -452,7 +451,6 @@ function fridgeRecommend(){
 let input=document.getElementById("fridgeInput").value.split(" ")
 
 let box=document.getElementById("fridgeList")
-
 box.innerHTML=""
 
 let list=recipes.filter(r=>
@@ -470,14 +468,11 @@ box.innerHTML+=card(r,recipes.indexOf(r))
 
 }
 
-
-
 /* ===== 详情 ===== */
 
 function openDetail(i){
 
 currentIndex=i
-
 let r=recipes[i]
 
 show("detail")
@@ -496,8 +491,6 @@ ${r.image?`<img src="${r.image}" style="width:100%">`:""}
 
 }
 
-
-
 /* ===== 删除 ===== */
 
 function deleteRecipe(){
@@ -513,8 +506,6 @@ show("all")
 renderRecipes()
 
 }
-
-
 
 /* ===== 初始化 ===== */
 
