@@ -11,11 +11,13 @@
 /* ===== 莫兰迪配色 ===== */
 
 :root{
---main:#6b7c85;
---accent:#a89f91;
---line:#e3e3e3;
+--main:#6c7a89;
+--accent:#b0a89f;
+--line:#e6e6e6;
 --bg:#fafafa;
 }
+
+/* ===== 全局 ===== */
 
 body{
 margin:0;
@@ -24,21 +26,19 @@ background:var(--bg);
 color:#333;
 }
 
-/* ===== Header ===== */
-
 header{
 padding:16px;
 text-align:center;
 font-size:20px;
-letter-spacing:2px;
 border-bottom:1px solid var(--line);
+letter-spacing:2px;
 }
 
 /* ===== 页面 ===== */
 
 .page{
 display:none;
-padding:16px;
+padding:18px;
 padding-bottom:90px;
 }
 
@@ -51,30 +51,15 @@ display:block;
 .card{
 border:1px solid var(--line);
 border-radius:14px;
-padding:12px;
-margin-bottom:14px;
+padding:14px;
+margin-bottom:16px;
 background:white;
 }
 
 .card img{
 width:100%;
 border-radius:10px;
-}
-
-/* ===== 按钮 ===== */
-
-button{
-border:1px solid var(--main);
-background:white;
-padding:8px 14px;
-border-radius:20px;
-color:var(--main);
-margin:4px;
-}
-
-button.primary{
-background:var(--main);
-color:white;
+margin-bottom:8px;
 }
 
 /* ===== 标签 ===== */
@@ -82,21 +67,53 @@ color:white;
 .tag{
 border:1px solid var(--accent);
 border-radius:14px;
-padding:4px 10px;
+padding:3px 10px;
 margin:3px;
 display:inline-block;
 font-size:12px;
 color:var(--accent);
 }
 
-/* ===== 筛选 ===== */
+/* ===== 按钮 ===== */
 
-.filter{
-margin-bottom:16px;
+button{
+border:1px solid var(--main);
+background:white;
+padding:8px 16px;
+border-radius:20px;
+color:var(--main);
+margin-top:6px;
 }
 
-.filter label{
-margin-right:10px;
+button.primary{
+background:var(--main);
+color:white;
+}
+
+/* ===== 输入框统一 ===== */
+
+input,
+textarea,
+select{
+
+width:100%;
+height:44px;
+box-sizing:border-box;
+
+padding:10px;
+margin:6px 0;
+
+border:1px solid var(--line);
+border-radius:10px;
+
+background:white;
+font-size:14px;
+
+}
+
+textarea{
+height:90px;
+resize:none;
 }
 
 /* ===== 底部导航 ===== */
@@ -122,16 +139,6 @@ nav button:last-child{
 border-right:none;
 }
 
-/* ===== 输入 ===== */
-
-input,textarea{
-width:100%;
-margin:6px 0;
-padding:10px;
-border:1px solid var(--line);
-border-radius:8px;
-}
-
 </style>
 </head>
 
@@ -142,42 +149,43 @@ border-radius:8px;
 
 
 <!-- 首页 -->
+
 <div id="home" class="page active">
+
 <h3>今日推荐</h3>
+
 <div id="homeList"></div>
+
 </div>
+
 
 
 <!-- 全部菜谱 -->
+
 <div id="all" class="page">
 
-<div class="filter">
+<h3>筛选</h3>
 
-<b>口味</b><br>
+<select id="tasteFilter" multiple>
+<option value="咸香">咸香</option>
+<option value="酸甜">酸甜</option>
+<option value="香辣">香辣</option>
+<option value="清炒">清炒</option>
+</select>
 
-<label><input type="checkbox" value="咸香" class="taste">咸香</label>
-<label><input type="checkbox" value="酸甜" class="taste">酸甜</label>
-<label><input type="checkbox" value="香辣" class="taste">香辣</label>
-<label><input type="checkbox" value="清炒" class="taste">清炒</label>
-
-<br><br>
-
-<b>做法</b><br>
-
-<label><input type="checkbox" value="炒" class="method">炒</label>
-<label><input type="checkbox" value="炖" class="method">炖</label>
-<label><input type="checkbox" value="炸" class="method">炸</label>
-<label><input type="checkbox" value="焖" class="method">焖</label>
-
-<br>
+<select id="methodFilter" multiple>
+<option value="炒">炒</option>
+<option value="炖">炖</option>
+<option value="炸">炸</option>
+<option value="焖">焖</option>
+</select>
 
 <button onclick="filterRecipes()">筛选</button>
-
-</div>
 
 <div id="recipeList"></div>
 
 </div>
+
 
 
 <!-- 冰箱推荐 -->
@@ -193,7 +201,8 @@ border-radius:8px;
 </div>
 
 
-<!-- 新建菜谱 -->
+
+<!-- 新增菜谱 -->
 
 <div id="add" class="page">
 
@@ -205,29 +214,24 @@ border-radius:8px;
 
 <input type="file" id="image">
 
-<br>
+<select id="tasteSelect" multiple>
+<option value="咸香">咸香</option>
+<option value="酸甜">酸甜</option>
+<option value="香辣">香辣</option>
+<option value="清炒">清炒</option>
+</select>
 
-<b>口味</b><br>
-
-<label><input type="checkbox" value="咸香" class="addTaste">咸香</label>
-<label><input type="checkbox" value="酸甜" class="addTaste">酸甜</label>
-<label><input type="checkbox" value="香辣" class="addTaste">香辣</label>
-<label><input type="checkbox" value="清炒" class="addTaste">清炒</label>
-
-<br><br>
-
-<b>做法</b><br>
-
-<label><input type="checkbox" value="炒" class="addMethod">炒</label>
-<label><input type="checkbox" value="炖" class="addMethod">炖</label>
-<label><input type="checkbox" value="炸" class="addMethod">炸</label>
-<label><input type="checkbox" value="焖" class="addMethod">焖</label>
-
-<br><br>
+<select id="methodSelect" multiple>
+<option value="炒">炒</option>
+<option value="炖">炖</option>
+<option value="炸">炸</option>
+<option value="焖">焖</option>
+</select>
 
 <button class="primary" onclick="saveRecipe()">保存</button>
 
 </div>
+
 
 
 <!-- 详情页 -->
@@ -241,13 +245,17 @@ border-radius:8px;
 </div>
 
 
+
 <!-- 底部导航 -->
 
 <nav>
 
 <button onclick="show('home')">首页</button>
+
 <button onclick="show('all')">菜谱</button>
+
 <button onclick="show('fridge')">冰箱</button>
+
 <button onclick="show('add')">新增</button>
 
 </nav>
@@ -262,10 +270,10 @@ let recipes=JSON.parse(localStorage.getItem("recipes")||"[]")
 
 let currentIndex=null
 
-
 function saveData(){
 localStorage.setItem("recipes",JSON.stringify(recipes))
 }
+
 
 
 /* ===== 页面切换 ===== */
@@ -284,6 +292,7 @@ if(id==="home") renderHome()
 }
 
 
+
 /* ===== 首页推荐 ===== */
 
 function renderHome(){
@@ -292,15 +301,19 @@ let box=document.getElementById("homeList")
 
 box.innerHTML=""
 
+if(recipes.length===0){
+box.innerHTML="还没有菜谱"
+return
+}
+
 let shuffled=[...recipes].sort(()=>0.5-Math.random())
 
-shuffled.slice(0,2).forEach((r,i)=>{
-
-box.innerHTML+=card(r,i)
-
+shuffled.slice(0,2).forEach(r=>{
+box.innerHTML+=card(r,recipes.indexOf(r))
 })
 
 }
+
 
 
 /* ===== 卡片 ===== */
@@ -318,7 +331,6 @@ ${r.image?`<img src="${r.image}">`:""}
 <div>
 
 ${r.taste.map(t=>`<span class="tag">${t}</span>`).join("")}
-
 ${r.method.map(m=>`<span class="tag">${m}</span>`).join("")}
 
 </div>
@@ -330,6 +342,7 @@ ${r.method.map(m=>`<span class="tag">${m}</span>`).join("")}
 }
 
 
+
 /* ===== 渲染菜谱 ===== */
 
 function renderRecipes(list=recipes){
@@ -339,21 +352,20 @@ let box=document.getElementById("recipeList")
 box.innerHTML=""
 
 list.forEach((r,i)=>{
-
 box.innerHTML+=card(r,i)
-
 })
 
 }
+
 
 
 /* ===== 筛选 ===== */
 
 function filterRecipes(){
 
-let taste=[...document.querySelectorAll(".taste:checked")].map(x=>x.value)
+let taste=[...document.getElementById("tasteFilter").selectedOptions].map(o=>o.value)
 
-let method=[...document.querySelectorAll(".method:checked")].map(x=>x.value)
+let method=[...document.getElementById("methodFilter").selectedOptions].map(o=>o.value)
 
 let list=recipes.filter(r=>{
 
@@ -370,6 +382,7 @@ renderRecipes(list)
 }
 
 
+
 /* ===== 保存菜谱 ===== */
 
 function saveRecipe(){
@@ -380,9 +393,9 @@ let ingredients=document.getElementById("ingredients").value.split(" ")
 
 let steps=document.getElementById("steps").value
 
-let taste=[...document.querySelectorAll(".addTaste:checked")].map(x=>x.value)
+let taste=[...document.getElementById("tasteSelect").selectedOptions].map(o=>o.value)
 
-let method=[...document.querySelectorAll(".addMethod:checked")].map(x=>x.value)
+let method=[...document.getElementById("methodSelect").selectedOptions].map(o=>o.value)
 
 let file=document.getElementById("image").files[0]
 
@@ -405,7 +418,7 @@ image:reader.result
 
 saveData()
 
-alert("已保存")
+alert("保存成功")
 
 }
 
@@ -424,11 +437,12 @@ image:null
 
 saveData()
 
-alert("已保存")
+alert("保存成功")
 
 }
 
 }
+
 
 
 /* ===== 冰箱推荐 ===== */
@@ -450,13 +464,12 @@ box.innerHTML="没有匹配菜谱"
 return
 }
 
-list.forEach((r,i)=>{
-
-box.innerHTML+=card(r,i)
-
+list.forEach(r=>{
+box.innerHTML+=card(r,recipes.indexOf(r))
 })
 
 }
+
 
 
 /* ===== 详情 ===== */
@@ -484,6 +497,7 @@ ${r.image?`<img src="${r.image}" style="width:100%">`:""}
 }
 
 
+
 /* ===== 删除 ===== */
 
 function deleteRecipe(){
@@ -499,6 +513,10 @@ show("all")
 renderRecipes()
 
 }
+
+
+
+/* ===== 初始化 ===== */
 
 renderHome()
 
