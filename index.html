@@ -1,509 +1,506 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>我的菜谱</title>
 
 <style>
 
 /* ===== 莫兰迪配色 ===== */
+
 :root{
---bg:#f6f5f2;
---card:#ffffff;
---primary:#8f9a8a;
---accent:#b7a9a1;
---text:#333;
---line:#e5e3de;
+--main:#6b7c85;
+--accent:#a89f91;
+--line:#e3e3e3;
+--bg:#fafafa;
 }
 
 body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont;
 background:var(--bg);
-color:var(--text);
+color:#333;
 }
 
-/* 顶部 */
+/* ===== Header ===== */
+
 header{
-background:var(--card);
 padding:16px;
 text-align:center;
 font-size:20px;
-font-weight:600;
+letter-spacing:2px;
 border-bottom:1px solid var(--line);
 }
 
-/* 页面容器 */
-.container{
+/* ===== 页面 ===== */
+
+.page{
+display:none;
 padding:16px;
-padding-bottom:80px;
+padding-bottom:90px;
 }
 
-/* 卡片 */
+.page.active{
+display:block;
+}
+
+/* ===== 卡片 ===== */
+
 .card{
-background:var(--card);
 border:1px solid var(--line);
 border-radius:14px;
-margin-bottom:16px;
-overflow:hidden;
-cursor:pointer;
+padding:12px;
+margin-bottom:14px;
+background:white;
 }
 
 .card img{
 width:100%;
-display:block;
+border-radius:10px;
 }
 
-.card-body{
-padding:12px;
-}
+/* ===== 按钮 ===== */
 
-.card-title{
-font-weight:600;
-}
-
-.card-sub{
-font-size:13px;
-color:#777;
-margin-top:4px;
-}
-
-/* 表单 */
-input,select,textarea{
-width:100%;
-padding:10px;
-margin-top:8px;
-border:1px solid var(--line);
-border-radius:8px;
-}
-
-/* 按钮 */
 button{
-padding:10px 14px;
-border-radius:8px;
-border:1px solid var(--primary);
+border:1px solid var(--main);
 background:white;
-color:var(--primary);
-margin-top:10px;
+padding:8px 14px;
+border-radius:20px;
+color:var(--main);
+margin:4px;
 }
 
-/* 底部导航 */
-.nav{
+button.primary{
+background:var(--main);
+color:white;
+}
+
+/* ===== 标签 ===== */
+
+.tag{
+border:1px solid var(--accent);
+border-radius:14px;
+padding:4px 10px;
+margin:3px;
+display:inline-block;
+font-size:12px;
+color:var(--accent);
+}
+
+/* ===== 筛选 ===== */
+
+.filter{
+margin-bottom:16px;
+}
+
+.filter label{
+margin-right:10px;
+}
+
+/* ===== 底部导航 ===== */
+
+nav{
 position:fixed;
 bottom:0;
-left:0;
-right:0;
+width:100%;
 height:60px;
-background:white;
 border-top:1px solid var(--line);
+background:white;
 display:flex;
-justify-content:space-around;
-align-items:center;
-font-size:13px;
 }
 
-.nav div{
-text-align:center;
+nav button{
+flex:1;
+border:none;
+border-right:1px solid var(--line);
+border-radius:0;
 }
 
-.icon{
-font-size:18px;
-display:block;
+nav button:last-child{
+border-right:none;
+}
+
+/* ===== 输入 ===== */
+
+input,textarea{
+width:100%;
+margin:6px 0;
+padding:10px;
+border:1px solid var(--line);
+border-radius:8px;
 }
 
 </style>
 </head>
 
+
 <body>
 
-<header>🍳 我的菜谱</header>
+<header>我的菜谱</header>
 
-<div id="app" class="container"></div>
 
-<!-- 底部导航 -->
-<div class="nav">
-<div onclick="home()"><span class="icon">🏠</span>首页</div>
-<div onclick="listPage()"><span class="icon">📖</span>菜谱</div>
-<div onclick="addPage()"><span class="icon">➕</span>新增</div>
-<div onclick="fridgePage()"><span class="icon">🧊</span>冰箱</div>
+<!-- 首页 -->
+<div id="home" class="page active">
+<h3>今日推荐</h3>
+<div id="homeList"></div>
 </div>
 
-<script>
 
-/* =========================
-   数据管理
-========================= */
+<!-- 全部菜谱 -->
+<div id="all" class="page">
 
-let recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
+<div class="filter">
 
-function save(){
-localStorage.setItem("recipes",JSON.stringify(recipes));
-}
+<b>口味</b><br>
 
-/* =========================
-   通用卡片组件
-========================= */
+<label><input type="checkbox" value="咸香" class="taste">咸香</label>
+<label><input type="checkbox" value="酸甜" class="taste">酸甜</label>
+<label><input type="checkbox" value="香辣" class="taste">香辣</label>
+<label><input type="checkbox" value="清炒" class="taste">清炒</label>
 
-function card(recipe,index){
+<br><br>
 
-return `
-<div class="card" onclick="detail(${index})">
+<b>做法</b><br>
 
-${recipe.image ? `<img src="${recipe.image}">` : ""}
+<label><input type="checkbox" value="炒" class="method">炒</label>
+<label><input type="checkbox" value="炖" class="method">炖</label>
+<label><input type="checkbox" value="炸" class="method">炸</label>
+<label><input type="checkbox" value="焖" class="method">焖</label>
 
-<div class="card-body">
-<div class="card-title">${recipe.name}</div>
-<div class="card-sub">${recipe.ingredients.join(" , ")}</div>
-</div>
+<br>
+
+<button onclick="filterRecipes()">筛选</button>
 
 </div>
-`;
 
-}
+<div id="recipeList"></div>
 
-/* =========================
-   首页推荐
-========================= */
+</div>
 
-function home(){
 
-let html="<h3>今日推荐</h3>";
+<!-- 冰箱推荐 -->
 
-if(recipes.length===0){
-html+="暂无菜谱";
-}else{
+<div id="fridge" class="page">
 
-let random=[...recipes]
-.sort(()=>0.5-Math.random())
-.slice(0,2);
+<input id="fridgeInput" placeholder="输入食材，例如：鸡蛋 土豆">
 
-random.forEach(r=>{
-html+=card(r,recipes.indexOf(r));
-});
+<button onclick="fridgeRecommend()">推荐</button>
 
-}
+<div id="fridgeList"></div>
 
-html+='<button onclick="home()">换一批</button>';
+</div>
 
-document.getElementById("app").innerHTML=html;
 
-}
+<!-- 新建菜谱 -->
 
-/* =========================
-   菜谱列表 + 筛选
-========================= */
-
-function listPage(){
-
-let html=`
-
-<h3>筛选菜谱</h3>
-
-<input id="filterFood" placeholder="食材">
-
-<select id="filterTaste">
-<option value="">口味</option>
-<option>清淡</option>
-<option>香辣</option>
-<option>酸甜</option>
-<option>麻辣</option>
-</select>
-
-<select id="filterType">
-<option value="">荤素</option>
-<option>荤菜</option>
-<option>素菜</option>
-</select>
-
-<button onclick="filter()">筛选</button>
-
-<div id="list"></div>
-
-`;
-
-document.getElementById("app").innerHTML=html;
-
-renderList(recipes);
-
-}
-
-function renderList(arr){
-
-let html="";
-
-arr.forEach((r,i)=>{
-html+=card(r,i);
-});
-
-document.getElementById("list").innerHTML=html || "没有菜谱";
-
-}
-
-function filter(){
-
-let food=document.getElementById("filterFood").value.trim();
-let taste=document.getElementById("filterTaste").value;
-let type=document.getElementById("filterType").value;
-
-let result=recipes.filter(r=>{
-
-let ok=true;
-
-if(food){
-ok=r.ingredients.some(i=>i.includes(food));
-}
-
-if(taste){
-ok=ok && r.taste===taste;
-}
-
-if(type){
-ok=ok && r.type===type;
-}
-
-return ok;
-
-});
-
-renderList(result);
-
-}
-
-/* =========================
-   详情页
-========================= */
-
-function detail(i){
-
-let r=recipes[i];
-
-let html=`
-
-<h2>${r.name}</h2>
-
-${r.image ? `<img style="width:100%;border-radius:12px" src="${r.image}">` : ""}
-
-<p><b>食材</b><br>${r.ingredients.join(" , ")}</p>
-
-<p><b>口味</b><br>${r.taste}</p>
-
-<p><b>荤素</b><br>${r.type}</p>
-
-<p><b>做法</b><br>${r.steps}</p>
-
-<button onclick="editPage(${i})">编辑</button>
-<button onclick="removeRecipe(${i})">删除</button>
-
-`;
-
-document.getElementById("app").innerHTML=html;
-
-}
-
-/* 删除菜谱 */
-
-function removeRecipe(i){
-
-if(confirm("确定删除？")){
-recipes.splice(i,1);
-save();
-listPage();
-}
-
-}
-
-/* =========================
-   新增菜谱
-========================= */
-
-function addPage(){
-
-let html=`
-
-<h3>新增菜谱</h3>
+<div id="add" class="page">
 
 <input id="name" placeholder="菜名">
 
-<input type="file" id="image">
-
-<input id="ingredients" placeholder="食材 用空格分开">
+<input id="ingredients" placeholder="食材（空格分开）">
 
 <textarea id="steps" placeholder="做法"></textarea>
 
-<select id="taste">
-<option>清淡</option>
-<option>香辣</option>
-<option>酸甜</option>
-<option>麻辣</option>
-</select>
+<input type="file" id="image">
 
-<select id="type">
-<option>荤菜</option>
-<option>素菜</option>
-</select>
+<br>
 
-<button onclick="addRecipe()">保存</button>
+<b>口味</b><br>
 
-`;
+<label><input type="checkbox" value="咸香" class="addTaste">咸香</label>
+<label><input type="checkbox" value="酸甜" class="addTaste">酸甜</label>
+<label><input type="checkbox" value="香辣" class="addTaste">香辣</label>
+<label><input type="checkbox" value="清炒" class="addTaste">清炒</label>
 
-document.getElementById("app").innerHTML=html;
+<br><br>
+
+<b>做法</b><br>
+
+<label><input type="checkbox" value="炒" class="addMethod">炒</label>
+<label><input type="checkbox" value="炖" class="addMethod">炖</label>
+<label><input type="checkbox" value="炸" class="addMethod">炸</label>
+<label><input type="checkbox" value="焖" class="addMethod">焖</label>
+
+<br><br>
+
+<button class="primary" onclick="saveRecipe()">保存</button>
+
+</div>
+
+
+<!-- 详情页 -->
+
+<div id="detail" class="page">
+
+<div id="detailContent"></div>
+
+<button onclick="deleteRecipe()">删除</button>
+
+</div>
+
+
+<!-- 底部导航 -->
+
+<nav>
+
+<button onclick="show('home')">首页</button>
+<button onclick="show('all')">菜谱</button>
+<button onclick="show('fridge')">冰箱</button>
+<button onclick="show('add')">新增</button>
+
+</nav>
+
+
+
+<script>
+
+/* ===== 数据 ===== */
+
+let recipes=JSON.parse(localStorage.getItem("recipes")||"[]")
+
+let currentIndex=null
+
+
+function saveData(){
+localStorage.setItem("recipes",JSON.stringify(recipes))
+}
+
+
+/* ===== 页面切换 ===== */
+
+function show(id){
+
+document.querySelectorAll(".page")
+.forEach(p=>p.classList.remove("active"))
+
+document.getElementById(id).classList.add("active")
+
+if(id==="all") renderRecipes()
+
+if(id==="home") renderHome()
 
 }
 
-function addRecipe(){
 
-let file=document.getElementById("image").files[0];
+/* ===== 首页推荐 ===== */
+
+function renderHome(){
+
+let box=document.getElementById("homeList")
+
+box.innerHTML=""
+
+let shuffled=[...recipes].sort(()=>0.5-Math.random())
+
+shuffled.slice(0,2).forEach((r,i)=>{
+
+box.innerHTML+=card(r,i)
+
+})
+
+}
+
+
+/* ===== 卡片 ===== */
+
+function card(r,i){
+
+return `
+
+<div class="card" onclick="openDetail(${i})">
+
+${r.image?`<img src="${r.image}">`:""}
+
+<h3>${r.name}</h3>
+
+<div>
+
+${r.taste.map(t=>`<span class="tag">${t}</span>`).join("")}
+
+${r.method.map(m=>`<span class="tag">${m}</span>`).join("")}
+
+</div>
+
+</div>
+
+`
+
+}
+
+
+/* ===== 渲染菜谱 ===== */
+
+function renderRecipes(list=recipes){
+
+let box=document.getElementById("recipeList")
+
+box.innerHTML=""
+
+list.forEach((r,i)=>{
+
+box.innerHTML+=card(r,i)
+
+})
+
+}
+
+
+/* ===== 筛选 ===== */
+
+function filterRecipes(){
+
+let taste=[...document.querySelectorAll(".taste:checked")].map(x=>x.value)
+
+let method=[...document.querySelectorAll(".method:checked")].map(x=>x.value)
+
+let list=recipes.filter(r=>{
+
+let tOk=!taste.length||taste.some(t=>r.taste.includes(t))
+
+let mOk=!method.length||method.some(m=>r.method.includes(m))
+
+return tOk && mOk
+
+})
+
+renderRecipes(list)
+
+}
+
+
+/* ===== 保存菜谱 ===== */
+
+function saveRecipe(){
+
+let name=document.getElementById("name").value
+
+let ingredients=document.getElementById("ingredients").value.split(" ")
+
+let steps=document.getElementById("steps").value
+
+let taste=[...document.querySelectorAll(".addTaste:checked")].map(x=>x.value)
+
+let method=[...document.querySelectorAll(".addMethod:checked")].map(x=>x.value)
+
+let file=document.getElementById("image").files[0]
+
+if(!name)return alert("请输入菜名")
 
 if(file){
 
-let reader=new FileReader();
+let reader=new FileReader()
 
-reader.onload=e=>{
-saveRecipe(e.target.result);
-};
+reader.onload=function(){
 
-reader.readAsDataURL(file);
+recipes.push({
+name,
+ingredients,
+steps,
+taste,
+method,
+image:reader.result
+})
+
+saveData()
+
+alert("已保存")
+
+}
+
+reader.readAsDataURL(file)
 
 }else{
 
-saveRecipe("");
+recipes.push({
+name,
+ingredients,
+steps,
+taste,
+method,
+image:null
+})
+
+saveData()
+
+alert("已保存")
 
 }
 
 }
 
-function saveRecipe(img){
 
-let recipe={
+/* ===== 冰箱推荐 ===== */
 
-name:document.getElementById("name").value,
-image:img,
-ingredients:document.getElementById("ingredients").value.split(" "),
-steps:document.getElementById("steps").value,
-taste:document.getElementById("taste").value,
-type:document.getElementById("type").value
+function fridgeRecommend(){
 
-};
+let input=document.getElementById("fridgeInput").value.split(" ")
 
-recipes.push(recipe);
+let box=document.getElementById("fridgeList")
 
-save();
+box.innerHTML=""
 
-listPage();
+let list=recipes.filter(r=>
+r.ingredients.some(i=>input.includes(i))
+)
+
+if(!list.length){
+box.innerHTML="没有匹配菜谱"
+return
+}
+
+list.forEach((r,i)=>{
+
+box.innerHTML+=card(r,i)
+
+})
 
 }
 
-/* =========================
-   编辑菜谱
-========================= */
 
-function editPage(i){
+/* ===== 详情 ===== */
 
-let r=recipes[i];
+function openDetail(i){
 
-let html=`
+currentIndex=i
 
-<h3>编辑菜谱</h3>
+let r=recipes[i]
 
-<input id="name" value="${r.name}">
+show("detail")
 
-<input id="ingredients" value="${r.ingredients.join(" ")}">
+document.getElementById("detailContent").innerHTML=`
 
-<textarea id="steps">${r.steps}</textarea>
+<h2>${r.name}</h2>
 
-<select id="taste">
-<option ${r.taste==="清淡"?"selected":""}>清淡</option>
-<option ${r.taste==="香辣"?"selected":""}>香辣</option>
-<option ${r.taste==="酸甜"?"selected":""}>酸甜</option>
-<option ${r.taste==="麻辣"?"selected":""}>麻辣</option>
-</select>
+${r.image?`<img src="${r.image}" style="width:100%">`:""}
 
-<select id="type">
-<option ${r.type==="荤菜"?"selected":""}>荤菜</option>
-<option ${r.type==="素菜"?"selected":""}>素菜</option>
-</select>
+<p><b>食材</b> ${r.ingredients.join(" ")}</p>
 
-<button onclick="updateRecipe(${i})">保存</button>
+<p><b>做法</b><br>${r.steps}</p>
 
-`;
-
-document.getElementById("app").innerHTML=html;
+`
 
 }
 
-function updateRecipe(i){
 
-recipes[i]={
+/* ===== 删除 ===== */
 
-name:document.getElementById("name").value,
-ingredients:document.getElementById("ingredients").value.split(" "),
-steps:document.getElementById("steps").value,
-taste:document.getElementById("taste").value,
-type:document.getElementById("type").value,
-image:recipes[i].image
+function deleteRecipe(){
 
-};
+if(currentIndex===null)return
 
-save();
+recipes.splice(currentIndex,1)
 
-detail(i);
+saveData()
+
+show("all")
+
+renderRecipes()
 
 }
 
-/* =========================
-   冰箱推荐
-========================= */
-
-function fridgePage(){
-
-let html=`
-
-<h3>冰箱有什么</h3>
-
-<input id="foods" placeholder="食材 用空格分开">
-
-<button onclick="recommend()">推荐</button>
-
-<div id="result"></div>
-
-`;
-
-document.getElementById("app").innerHTML=html;
-
-}
-
-function recommend(){
-
-let foods=document.getElementById("foods")
-.value
-.trim()
-.split(" ");
-
-let result=recipes.filter(r=>{
-
-return r.ingredients.some(i=>
-foods.some(f=>i.includes(f))
-);
-
-});
-
-let html="";
-
-result.forEach((r,i)=>{
-html+=card(r,i);
-});
-
-document.getElementById("result").innerHTML=html || "没有匹配菜谱";
-
-}
-
-/* =========================
-   启动
-========================= */
-
-home();
+renderHome()
 
 </script>
 
