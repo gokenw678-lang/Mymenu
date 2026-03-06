@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>今天吃什么</title>
+<title>我的菜谱</title>
 
 <style>
 
@@ -34,6 +33,7 @@ border:1px solid #eee;
 border-radius:14px;
 margin-bottom:18px;
 overflow:hidden;
+cursor:pointer;
 }
 
 .card img{
@@ -62,6 +62,7 @@ background:white;
 padding:10px 14px;
 border-radius:8px;
 margin-top:10px;
+margin-right:8px;
 }
 
 input,select,textarea{
@@ -96,7 +97,7 @@ color:#555;
 
 <body>
 
-<header>今天吃什么</header>
+<header>我的菜谱</header>
 
 <div class="container" id="content"></div>
 
@@ -118,10 +119,28 @@ localStorage.setItem("recipes",JSON.stringify(recipes));
 }
 
 function randomRecipes(){
-
 let shuffled=[...recipes].sort(()=>0.5-Math.random());
 return shuffled.slice(0,2);
+}
 
+function cardHTML(r,i){
+return `
+
+<div class="card" onclick="showDetail(${i})">
+
+${r.image?`<img src="${r.image}">`:""}
+
+<div class="card-content">
+
+<div class="card-title">${r.name}</div>
+
+<div class="card-sub">${r.ingredients.join(", ")}</div>
+
+</div>
+
+</div>
+
+`;
 }
 
 function showHome(){
@@ -131,9 +150,7 @@ let rec=randomRecipes();
 let html="<h3>今日推荐</h3>";
 
 rec.forEach(r=>{
-
-html+=cardHTML(r);
-
+html+=cardHTML(r,recipes.indexOf(r));
 });
 
 html+=`<button onclick="showHome()">换一批</button>`;
@@ -142,43 +159,138 @@ document.getElementById("content").innerHTML=html;
 
 }
 
-function cardHTML(r){
+function showList(){
 
-return `
+let html="";
 
-<div class="card">
+recipes.forEach((r,i)=>{
+html+=cardHTML(r,i);
+});
 
-${r.image?`<img src="${r.image}">`:""}
+document.getElementById("content").innerHTML=html;
 
-<div class="card-content">
+}
 
-<div class="card-title">${r.name}</div>
+function showDetail(i){
 
-<div class="card-sub">
+let r=recipes[i];
 
-${r.ingredients.join(", ")}
+let html=`
 
-</div>
+<h2>${r.name}</h2>
 
-</div>
+${r.image?`<img style="width:100%;border-radius:12px;" src="${r.image}">`:""}
 
-</div>
+<p><b>食材</b><br>${r.ingredients.join(", ")}</p>
+
+<p><b>口味</b><br>${r.taste}</p>
+
+<p><b>荤素</b><br>${r.type}</p>
+
+<p><b>做法</b><br>${r.steps}</p>
+
+<button onclick="editRecipe(${i})">编辑</button>
+<button onclick="deleteRecipe(${i})">删除</button>
+
+`;
+
+document.getElementById("content").innerHTML=html;
+
+}
+
+function deleteRecipe(i){
+
+if(confirm("确定删除？")){
+
+recipes.splice(i,1);
+
+save();
+
+showList();
+
+}
+
+}
+
+function editRecipe(i){
+
+let r=recipes[i];
+
+document.getElementById("content").innerHTML=`
+
+<h3>编辑菜谱</h3>
+
+<input id="name" value="${r.name}">
+
+<input type="file" id="image">
+
+<input id="ingredients" value="${r.ingredients.join(" ")}">
+
+<textarea id="steps">${r.steps}</textarea>
+
+<select id="taste">
+<option ${r.taste=="清淡"?"selected":""}>清淡</option>
+<option ${r.taste=="香辣"?"selected":""}>香辣</option>
+<option ${r.taste=="酸甜"?"selected":""}>酸甜</option>
+<option ${r.taste=="麻辣"?"selected":""}>麻辣</option>
+</select>
+
+<select id="type">
+<option ${r.type=="荤菜"?"selected":""}>荤菜</option>
+<option ${r.type=="素菜"?"selected":""}>素菜</option>
+</select>
+
+<button onclick="updateRecipe(${i})">保存修改</button>
 
 `;
 
 }
 
-function showList(){
+function updateRecipe(i){
 
-let html="";
+let file=document.getElementById("image").files[0];
 
-recipes.forEach(r=>{
+if(file){
 
-html+=cardHTML(r);
+let reader=new FileReader();
 
-});
+reader.onload=function(e){
 
-document.getElementById("content").innerHTML=html;
+saveUpdate(i,e.target.result);
+
+}
+
+reader.readAsDataURL(file);
+
+}else{
+
+saveUpdate(i,recipes[i].image);
+
+}
+
+}
+
+function saveUpdate(i,img){
+
+recipes[i]={
+
+name:document.getElementById("name").value,
+
+image:img,
+
+ingredients:document.getElementById("ingredients").value.split(" "),
+
+steps:document.getElementById("steps").value,
+
+taste:document.getElementById("taste").value,
+
+type:document.getElementById("type").value
+
+};
+
+save();
+
+showDetail(i);
 
 }
 
@@ -190,7 +302,7 @@ document.getElementById("content").innerHTML=`
 
 <input id="name" placeholder="菜名">
 
-<input type="file" id="image" accept="image/*">
+<input type="file" id="image">
 
 <input id="ingredients" placeholder="食材 空格分开">
 
@@ -224,7 +336,7 @@ let reader=new FileReader();
 
 reader.onload=function(e){
 
-saveRecipe(e.target.result);
+saveNew(e.target.result);
 
 }
 
@@ -232,13 +344,13 @@ reader.readAsDataURL(file);
 
 }else{
 
-saveRecipe("");
+saveNew("");
 
 }
 
 }
 
-function saveRecipe(img){
+function saveNew(img){
 
 let recipe={
 
@@ -259,8 +371,6 @@ type:document.getElementById("type").value
 recipes.push(recipe);
 
 save();
-
-alert("保存成功");
 
 showList();
 
@@ -288,13 +398,13 @@ let foods=document.getElementById("foods").value.split(" ");
 
 let html="";
 
-recipes.forEach(r=>{
+recipes.forEach((r,i)=>{
 
-let match=r.ingredients.filter(i=>foods.includes(i));
+let match=r.ingredients.filter(a=>foods.includes(a));
 
 if(match.length>0){
 
-html+=cardHTML(r);
+html+=cardHTML(r,i);
 
 }
 
@@ -310,4 +420,3 @@ showHome();
 
 </body>
 </html>
-
